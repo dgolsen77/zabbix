@@ -145,7 +145,7 @@ static void	discovery_get_regkey_values(HKEY hKey, wchar_t *current_subkey, stru
 	wchar_t			achClass[MAX_PATH] = TEXT(""), achValue[MAX_VALUE_NAME];
 	DWORD			cchClassName = MAX_PATH, cSubKeys=0, cValues, cbName, i, retCode,
 				cchValue = MAX_VALUE_NAME;
-	char			*uroot, *usubkey;
+	char			*uroot, *usubkey, *uchclass;
 	zbx_vector_wchar_ptr_t	wsubkeys;
 
 	retCode = RegQueryInfoKey(hKey, achClass, &cchClassName, NULL, &cSubKeys, NULL, NULL, &cValues, NULL, NULL,
@@ -155,6 +155,7 @@ static void	discovery_get_regkey_values(HKEY hKey, wchar_t *current_subkey, stru
 
 	uroot = zbx_unicode_to_utf8(root);
 	usubkey = zbx_unicode_to_utf8(current_subkey);
+	uchclass = zbx_unicode_to_utf8(achClass);
 
 	if (REGISTRY_DISCOVERY_MODE_KEYS == mode)
 	{
@@ -163,11 +164,13 @@ static void	discovery_get_regkey_values(HKEY hKey, wchar_t *current_subkey, stru
 			zbx_json_addobject(j, NULL);
 			zbx_json_addstring(j, ZBX_SYSINFO_REGISTRY_TAG_FULLKEY, uroot, ZBX_JSON_TYPE_STRING);
 			zbx_json_addstring(j, ZBX_SYSINFO_REGISTRY_TAG_LASTKEY, usubkey, ZBX_JSON_TYPE_STRING);
+			zbx_json_addstring(j, "class", uchclass, ZBX_JSON_TYPE_STRING);
 			zbx_json_close(j);
 		}
 
 		zbx_free(uroot);
 		zbx_free(usubkey);
+		zbx_free(uchclass);
 	}
 
 	for (i = 0; i < cSubKeys; i++)
